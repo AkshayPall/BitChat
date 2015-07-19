@@ -57,7 +57,7 @@ public class ContactsFragment extends Fragment implements AdapterView.OnItemClic
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_contacts,null);
-
+        setRetainInstance(true);
         ListView listView = (ListView)v.findViewById(R.id.list);
 
         ContactDataSource dataSource = new ContactDataSource(getActivity(),this);

@@ -3,32 +3,58 @@ package com.example.akshaypall.bitchat;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
 
 
-public class ChatActivity extends ActionBarActivity {
+public class ChatActivity extends ActionBarActivity implements View.OnClickListener{
+
+    private ArrayList<Message> mMessageArrayList;
+    private MessagesAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        ArrayList<Message> messageArrayList = new ArrayList<>();
-        messageArrayList.add(new Message("Test", ContactDataSource.getCurrentUser().getmPhoneNumber()));
-        messageArrayList.add(new Message("Test2", "4168483178"));
+        mMessageArrayList = new ArrayList<>();
+        mMessageArrayList.add(new Message("Test", ContactDataSource.getCurrentUser().getmPhoneNumber()));
+        mMessageArrayList.add(new Message("Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2  ",
+                "4168483178"));
+        mMessageArrayList.add(new Message("success", "4168483178"));
 
         ListView messagesListView = (ListView)findViewById(R.id.messages_list);
-        messagesListView.setAdapter(new MessagesAdapter(messageArrayList));
+        mAdapter = new MessagesAdapter(mMessageArrayList);
+        messagesListView.setAdapter(mAdapter);
+
+        Button sendMessageButton = (Button)findViewById(R.id.send_message_button);
+        sendMessageButton.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        EditText messageField = (EditText)findViewById(R.id.new_message_field);
+        String text = messageField.getText().toString();
+        if (!text.equals("")) {
+            Message newMessage = new Message(text, ContactDataSource.getCurrentUser().getmPhoneNumber());
+            mMessageArrayList.add(newMessage);
+            mAdapter.notifyDataSetChanged();
+            messageField.setText("");
+        }
     }
 
     @Override
@@ -65,12 +91,16 @@ public class ChatActivity extends ActionBarActivity {
             TextView messageView = (TextView)v.findViewById(R.id.message);
             messageView.setText(message.getmText());
 
-            if (message.getmSender().equals(ContactDataSource.getCurrentUser().getmPhoneNumber())){
-                messageView.setBackgroundColor(Color.GREEN);
-            } else {
-                messageView.setBackgroundColor(Color.BLUE);
-            }
+            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams)messageView.getLayoutParams();
 
+            if (message.getmSender().equals(ContactDataSource.getCurrentUser().getmPhoneNumber())){
+                messageView.setBackground(getDrawable(R.drawable.bubble_right_green));
+                layoutParams.gravity = Gravity.RIGHT;
+            } else {
+                messageView.setBackground(getDrawable(R.drawable.bubble_left_grey));
+                layoutParams.gravity = Gravity.LEFT;
+            }
+            messageView.setLayoutParams(layoutParams);
             return v;
         }
     }

@@ -1,10 +1,29 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.example.akshaypall.bitchat.ChatActivity">
 
     <ListView android:text="@string/hello_world" android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/messages_list"/>
+        android:layout_height="0dp"
+        android:layout_weight="100"
+        android:id="@+id/messages_list"
+        android:divider="@null"/>
 
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_weight="100"
+            android:layout_height="wrap_content"
+            android:id="@+id/new_message_field"
+            android:hint="@string/enter_message_hint"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send_message_button"
+            android:id="@+id/send_message_button"/>
+    </LinearLayout>
+
+</LinearLayout>
