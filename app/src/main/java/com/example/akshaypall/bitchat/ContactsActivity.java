@@ -10,7 +10,7 @@ import com.parse.Parse;
 import com.parse.ParseUser;
 
 
-public class ContactsActivity extends ActionBarActivity {
+public class ContactsActivity extends ActionBarActivity implements ContactsFragment.Listener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +20,7 @@ public class ContactsActivity extends ActionBarActivity {
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, "kMcEGYIpbHEDD2xoyFVby0pUeAnXxzwzkoDNY1gD", "nn9aPOeDNlRzgTbWkIK6HxyMu5tU6zPXkALzyzcs");
 
-        if (ParseUser.getCurrentUser() == null){
+        if (ContactDataSource.getCurrentUser() == null){
             Intent i = new Intent(this, SignInActivity.class);
             startActivity(i);
         }
@@ -31,6 +31,11 @@ public class ContactsActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onContactSelected(Contact contact) {
+        Intent i = new Intent(this, ChatActivity.class);
+        startActivity(i);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

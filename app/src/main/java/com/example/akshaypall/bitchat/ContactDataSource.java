@@ -24,6 +24,9 @@ import java.util.List;
  */
 public class ContactDataSource implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    //user singleton
+    private static Contact sCurrentUser;
+
     private static final String TAG = "TAG";
     private Context mContext;
     private Listener mListener;
@@ -35,6 +38,17 @@ public class ContactDataSource implements LoaderManager.LoaderCallbacks<Cursor> 
     ContactDataSource(Context context, Listener listener) {
         mContext = context;
         mListener = listener;
+    }
+
+    //getting singleton
+    public static Contact getCurrentUser() {
+        if (sCurrentUser == null && ParseUser.getCurrentUser() != null) {
+            sCurrentUser = new Contact();
+            sCurrentUser.setmPhoneNumber(ParseUser.getCurrentUser().getUsername());
+            sCurrentUser.setmName(ParseUser.getCurrentUser().get(NAME_COLUMN).toString());
+        }
+
+        return sCurrentUser;
     }
 
     @Override
