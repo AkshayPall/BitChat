@@ -1,8 +1,8 @@
 package com.example.akshaypall.bitchat;
 
-import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,32 +14,48 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.parse.ParseUser;
 
 import java.util.ArrayList;
+import java.util.Date;
+import android.os.Handler;
 
 
-public class ChatActivity extends ActionBarActivity implements View.OnClickListener{
+public class ChatActivity extends ActionBarActivity implements View.OnClickListener, MessageDataSource.Listener{
+
+    public static final String CONTACT_NUMBER = "CONTACT_NUMBER";
+    public static final String TAG = "TAG";
 
     private ArrayList<Message> mMessageArrayList;
     private MessagesAdapter mAdapter;
+    private String mCurrentRecipientNumber;
+    private ListView mMessagesListView;
+    private Date mLastMessageDate;
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "Polled");
+            MessageDataSource.fetchMessagesAfter(ContactDataSource.getCurrentUser().getmPhoneNumber(),
+                    mCurrentRecipientNumber,
+                    mLastMessageDate,
+                    ChatActivity.this);
+            mHandler.postDelayed(mRunnable, 2000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        mMessageArrayList = new ArrayList<>();
-        mMessageArrayList.add(new Message("Test", ContactDataSource.getCurrentUser().getmPhoneNumber()));
-        mMessageArrayList.add(new Message("Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2 Test2 Test2Test2 Test2Test2Test2  ",
-                "4168483178"));
-        mMessageArrayList.add(new Message("success", "4168483178"));
+        mCurrentRecipientNumber = getIntent().getStringExtra(CONTACT_NUMBER);
 
-        ListView messagesListView = (ListView)findViewById(R.id.messages_list);
+        mMessageArrayList = new ArrayList<>();
+        MessageDataSource.fetchMessages(ContactDataSource.getCurrentUser().getmPhoneNumber(), mCurrentRecipientNumber, this);
+
+        mMessagesListView = (ListView)findViewById(R.id.messages_list);
         mAdapter = new MessagesAdapter(mMessageArrayList);
-        messagesListView.setAdapter(mAdapter);
+        mMessagesListView.setAdapter(mAdapter);
 
         Button sendMessageButton = (Button)findViewById(R.id.send_message_button);
         sendMessageButton.setOnClickListener(this);
@@ -54,7 +70,35 @@ public class ChatActivity extends ActionBarActivity implements View.OnClickListe
             mMessageArrayList.add(newMessage);
             mAdapter.notifyDataSetChanged();
             messageField.setText("");
+            MessageDataSource.sendMessage(newMessage.getmSender(), mCurrentRecipientNumber, newMessage.getmText());
         }
+    }
+
+    @Override
+    public void onFetchedMessages(ArrayList<Message> messages) {
+        mMessageArrayList.clear();
+        addMessages(messages);
+        mHandler.postDelayed(mRunnable, 2000);
+    }
+
+    private void addMessages(ArrayList<Message> messages) {
+        mMessageArrayList.addAll(messages);
+        mAdapter.notifyDataSetChanged();
+        if (mMessageArrayList.size() > 0){
+            mMessagesListView.setSelection(messages.size()-1);
+            mLastMessageDate = messages.get(messages.size()-1).getmDate();
+        }
+    }
+
+    @Override
+    public void onAddMessages(ArrayList<Message> messages) {
+        addMessages(messages);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mHandler.removeCallbacks(mRunnable);
     }
 
     @Override
