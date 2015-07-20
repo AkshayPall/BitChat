@@ -1,5 +1,6 @@
 package com.example.akshaypall.bitchat;
 
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,7 +30,7 @@ public class ChatActivity extends ActionBarActivity implements View.OnClickListe
     private MessagesAdapter mAdapter;
     private String mCurrentRecipientNumber;
     private ListView mMessagesListView;
-    private Date mLastMessageDate;
+    private Date mLastMessageDate = new Date();
     private Handler mHandler = new Handler();
     private Runnable mRunnable = new Runnable() {
         @Override
@@ -67,7 +68,6 @@ public class ChatActivity extends ActionBarActivity implements View.OnClickListe
         String text = messageField.getText().toString();
         if (!text.equals("")) {
             Message newMessage = new Message(text, ContactDataSource.getCurrentUser().getmPhoneNumber());
-            mMessageArrayList.add(newMessage);
             mAdapter.notifyDataSetChanged();
             messageField.setText("");
             MessageDataSource.sendMessage(newMessage.getmSender(), mCurrentRecipientNumber, newMessage.getmText());
@@ -85,8 +85,8 @@ public class ChatActivity extends ActionBarActivity implements View.OnClickListe
         mMessageArrayList.addAll(messages);
         mAdapter.notifyDataSetChanged();
         if (mMessageArrayList.size() > 0){
-            mMessagesListView.setSelection(messages.size()-1);
-            mLastMessageDate = messages.get(messages.size()-1).getmDate();
+            mMessagesListView.setSelection(mMessageArrayList.size()-1);
+            mLastMessageDate = mMessageArrayList.get(mMessageArrayList.size()-1).getmDate();
         }
     }
 
@@ -136,12 +136,15 @@ public class ChatActivity extends ActionBarActivity implements View.OnClickListe
             messageView.setText(message.getmText());
 
             LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams)messageView.getLayoutParams();
+            int sdk = Build.VERSION.SDK_INT;
 
             if (message.getmSender().equals(ContactDataSource.getCurrentUser().getmPhoneNumber())){
-                messageView.setBackground(getDrawable(R.drawable.bubble_right_green));
+                if (sdk >= Build.VERSION_CODES.JELLY_BEAN) messageView.setBackground(getDrawable(R.drawable.bubble_right_green));
+                else messageView.setBackgroundDrawable(getDrawable(R.drawable.bubble_right_green));
                 layoutParams.gravity = Gravity.RIGHT;
             } else {
-                messageView.setBackground(getDrawable(R.drawable.bubble_left_grey));
+                if (sdk >= Build.VERSION_CODES.JELLY_BEAN) messageView.setBackground(getDrawable(R.drawable.bubble_left_grey));
+                else messageView.setBackgroundDrawable(getDrawable(R.drawable.bubble_left_grey));
                 layoutParams.gravity = Gravity.LEFT;
             }
             messageView.setLayoutParams(layoutParams);
